@@ -123,4 +123,11 @@ object ListTest extends App {
   println(list.sort((x, y) => y - x))
   println(anotherList.zipWith[String, String](listOfStrings, _ + "-" + _))
   println(list.fold(0)(_ + _))
+
+  // for comprehensions
+  val combinations = for {
+    n <- list
+    string <- listOfStrings
+  } yield n + "-" + string
+  println(combinations)
 }
