@@ -40,7 +40,7 @@ abstract class MyList[+A] {
   def ++[B >: A](list: MyList[B]): MyList[B]
 }
 
-object EmptyList extends MyList[Nothing] {
+case object EmptyList extends MyList[Nothing] {
   def head: Nothing = throw new NoSuchElementException()
   def tail: MyList[Nothing] = throw new NoSuchElementException()
   def isEmpty: Boolean = true
@@ -53,7 +53,7 @@ object EmptyList extends MyList[Nothing] {
   def ++[B >: Nothing](list: MyList[B]): MyList[B] = list
 }
 
-class NotEmptyList[+A](h: A, t: MyList[A]) extends MyList[A]{
+case class NotEmptyList[+A](h: A, t: MyList[A]) extends MyList[A]{
   def head: A = h
   def tail: MyList[A] = t
   def isEmpty: Boolean = false
