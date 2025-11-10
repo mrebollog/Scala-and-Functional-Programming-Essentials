@@ -81,15 +81,9 @@ object ListTest extends App {
   println(list.add(22).head)
   println(list.isEmpty)
 
-  println(list.map(new Function1[Int, Int] {
-    override def apply(element: Int): Int = element + 13
-  }).toString)
+  println(list.map((element: Int) => element + 13).toString)
 
-  println(list.filter(new Function1[Int, Boolean] {
-    override def apply(element: Int): Boolean = element % 2 == 0
-  }).toString)
+  println(list.filter((element: Int) => element % 2 == 0).toString)
 
-  println(list.flatMap(new Function1[Int, MyList[Int]] {
-    override def apply(element: Int): MyList[Int] = new NotEmptyList(element, new NotEmptyList(element * 2, EmptyList))
-  }).toString)
+  println(list.flatMap((element: Int) => new NotEmptyList(element, new NotEmptyList(element * 2, EmptyList))).toString)
 }

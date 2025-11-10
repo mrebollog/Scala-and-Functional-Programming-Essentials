@@ -13,11 +13,7 @@ object WhatsAFunction extends App {
     override def apply(string1: String, string2: String): String = string1 + string2
   }
 
-  def function = new Function1[Int, Function1[Int, Int]]{
-    override def apply(x: Int): Function1[Int, Int] = new Function1[Int, Int]{
-      override def apply(y: Int): Int = y + x
-    }
-  }
+  def function: (Int) => (Int) => (Int) = (x: Int) => ((y: Int) => x + y)
 
   println(concatenator("Matias", "Matias"))
   println(function(1)(2))
