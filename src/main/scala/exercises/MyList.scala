@@ -38,6 +38,11 @@ abstract class MyList[+A] {
   def filter(predicate: A => Boolean): MyList[A]
   def flatMap[B](transformer: A => MyList[B]): MyList[B]
   def ++[B >: A](list: MyList[B]): MyList[B]
+
+  def foreach(f: A => Unit): Unit
+  def sort(compare: (A, A) => Int): MyList[A]
+  def zipWith[B, C](list: MyList[B], zip: (A, B) => C): MyList[C]
+  def fold[B](start: B)(operator: (B, A) => B): B
 }
 
 case object EmptyList extends MyList[Nothing] {
@@ -51,6 +56,11 @@ case object EmptyList extends MyList[Nothing] {
   def filter(predicate: Nothing => Boolean): MyList[Nothing] = EmptyList
   def flatMap[B](transformer: Nothing => MyList[B]): MyList[Nothing] = EmptyList
   def ++[B >: Nothing](list: MyList[B]): MyList[B] = list
+
+  def foreach(f: Nothing => Unit): Unit = ()
+  def sort(compare: (Nothing, Nothing) => Int) = EmptyList
+  def zipWith[B, C](list: MyList[B], zip: (Nothing, B) => C): MyList[C] = EmptyList
+  def fold[B](start: B)(operator: (B, Nothing) => B): B = start
 }
 
 case class NotEmptyList[+A](h: A, t: MyList[A]) extends MyList[A]{
@@ -73,6 +83,28 @@ case class NotEmptyList[+A](h: A, t: MyList[A]) extends MyList[A]{
   def flatMap[B](transformer: A => MyList[B]): MyList[B] =
     transformer(h) ++ t.flatMap(transformer)
   def ++[B >: A](list: MyList[B]): MyList[B] = new NotEmptyList(h, t ++ list)
+
+  def foreach(f: A => Unit): Unit = {
+    f(h)
+    t.foreach(f)
+  }
+
+  def sort(compare: (A, A) => Int): MyList[A] = {
+    def insert(x: A, sortedList: MyList[A]): MyList[A] =
+      if (sortedList.isEmpty) new NotEmptyList(x, EmptyList)
+      else if (compare(x, sortedList.head) <= 0) new NotEmptyList(x, sortedList)
+      else new NotEmptyList(sortedList.head, insert(x, sortedList.tail))
+
+    val sortedTail = t.sort(compare)
+    insert(h, sortedTail)
+  }
+
+  def zipWith[B, C](list: MyList[B], zip: (A, B) => C): MyList[C] =
+    if (list.isEmpty) throw new RuntimeException("Lists do not have the same length")
+    else new NotEmptyList(zip(h, list.head), t.zipWith(list.tail, zip))
+
+  def fold[B](start: B)(operator: (B, A) => B): B =
+    t.fold(operator(start, h))(operator)
 }
 
 object ListTest extends App {
@@ -82,8 +114,13 @@ object ListTest extends App {
   println(list.isEmpty)
 
   println(list.map((element: Int) => element + 13).toString)
-
   println(list.filter((element: Int) => element % 2 == 0).toString)
-
   println(list.flatMap((element: Int) => new NotEmptyList(element, new NotEmptyList(element * 2, EmptyList))).toString)
+
+  val anotherList: MyList[Int] = new NotEmptyList(4, new NotEmptyList(5, EmptyList))
+  val listOfStrings: MyList[String] = new NotEmptyList("Hello", new NotEmptyList("Scala", EmptyList))
+  list.foreach(println)
+  println(list.sort((x, y) => y - x))
+  println(anotherList.zipWith[String, String](listOfStrings, _ + "-" + _))
+  println(list.fold(0)(_ + _))
 }
